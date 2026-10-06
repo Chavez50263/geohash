@@ -20,3 +20,10 @@ A small, dependency-free encoder/decoder for code that needs geohash strings wit
 Decoding returns a **bounding box**, not a point. `decode_center` returns the box's midpoint, which is only an approximation of the original coordinate. If you need exact round-tripping, use `decode_range`: at precision 12, the lower bound of the box equals the coordinate passed to `encode` (because `encode` chooses the upper half when the coordinate is `>=` the midpoint, so the coordinate lands on the lower edge of the selected cell).
 
 Latitude is clamped to [-90, 90] and longitude to [-180, 180]; out-of-range inputs raise `ValueError`. NaN and infinities are rejected. Input hashes are case-insensitive and leading/trailing whitespace is stripped.
+
+## Design notes
+
+The window stores values eagerly rather than keeping running aggregates. Running
+sums drift with floating point over long streams, and recomputing from a small
+buffer is cheap enough that the drift is not worth the speed.
+
